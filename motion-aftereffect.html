@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Motion Aftereffect · BIOL2005 Illusions Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,500;1,400&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .mae-canvas-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 700px;
+    aspect-ratio: 700 / 500;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid var(--rule-soft);
+  }
+  #mae-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .phase-indicator {
+    text-align: center;
+    margin-top: 16px;
+    font-family: var(--sans);
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+  .phase-indicator strong {
+    color: var(--accent);
+    font-weight: 600;
+    margin-right: 6px;
+  }
+  .timer {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--ink);
+    margin-left: 8px;
+  }
+  .start-button-row {
+    text-align: center;
+    margin-top: 12px;
+  }
+  .experiment-block {
+    background: #fafaf7;
+    border: 1px solid var(--rule-soft);
+    border-radius: 3px;
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  .experiment-block.active {
+    background: #fff;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent) inset;
+  }
+  .experiment-block .exp-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .experiment-block .exp-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.06em;
+  }
+  .experiment-block .exp-title {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    flex: 1;
+    margin: 0 10px;
+  }
+  .experiment-block .exp-toggle {
+    font-family: var(--sans);
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .experiment-block.active .exp-toggle { color: var(--accent); }
+  .experiment-block .exp-body { display: none; }
+  .experiment-block.active .exp-body { display: block; }
+  .exp-explainer {
+    font-family: var(--serif);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--rule-soft);
+  }
+  .exp-explainer-only {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-brand"><span>◆</span> BIOL2005 · Illusions Lab</a>
+    <div class="nav-links">
+      <a href="pulfrich.html">Pulfrich Effect</a>
+      <a href="motion-aftereffect.html">Motion Aftereffect</a>
+      <a href="simultaneous-contrast.html">Simultaneous Contrast</a>
+      <a href="illusory-contours.html">Illusory Contours</a>
+    </div>
+  </div>
+</nav>
+
+<main class="page">
+
+  <header class="page-header">
+    <p class="eyebrow">Illusion 02 · Motion</p>
+    <h1>Motion Aftereffect</h1>
+    <p class="lede"></p>
+  </header>
+
+  <div class="viewing-note">
+    <strong>How to view</strong>
+    This illusion has two phases: a dynamic adapter phase in which the rings will move for 20 seconds and a static test phase in which the stimulus does not move. Fixate the red cross at the centre throughout both adaptation and test. Do not let your eyes follow the moving pattern, or the aftereffect will be weakened or absent. Press <em>Start trial</em> to begin.
+  </div>
+
+  <div class="illusion-grid">
+
+    <div>
+      <div class="stage">
+        <div class="mae-canvas-wrap">
+          <canvas id="mae-canvas" width="700" height="500"></canvas>
+        </div>
+        <div class="phase-indicator">
+          <strong id="phase-label">READY</strong>
+          <span id="phase-detail">Press Start to begin a trial.</span>
+          <span class="timer" id="timer"></span>
+        </div>
+        <div class="start-button-row">
+          <button class="btn" id="start-btn">Start trial</button>
+          <button class="btn btn-ghost" id="stop-btn">Stop</button>
+        </div>
+      </div>
+    </div>
+
+    <aside class="controls">
+      <p class="controls-title">Manipulations</p>
+
+      <div class="experiment-block active" data-exp="1">
+        <div class="exp-header">
+          <span class="exp-num">01</span>
+          <span class="exp-title">Default illusion</span>
+          <span class="exp-toggle">Active</span>
+        </div>
+        <div class="exp-body">
+          <p class="exp-explainer exp-explainer-only">Shows the canonical motion aftereffect: a 20-second adaptation phase of inward-contracting concentric rings, followed by a static test pattern of the same rings.</p>
+        </div>
+      </div>
+
+      <div class="experiment-block" data-exp="2">
+        <div class="exp-header">
+          <span class="exp-num">02</span>
+          <span class="exp-title">Test contrast</span>
+          <span class="exp-toggle">Open</span>
+        </div>
+        <div class="exp-body">
+          <div class="control-group" style="margin-bottom: 0;">
+            <div class="control-label">
+              <span>Test pattern contrast</span>
+              <span class="control-value" id="val-exp2">100%</span>
+            </div>
+            <input type="range" id="exp2" min="5" max="100" value="100">
+          </div>
+          <p class="exp-explainer">The adapter is unchanged (full-contrast contracting rings). The slider varies only the contrast of the static test pattern, from very faint (5%) to full contrast (100%).</p>
+        </div>
+      </div>
+
+      <div class="experiment-block" data-exp="3">
+        <div class="exp-header">
+          <span class="exp-num">03</span>
+          <span class="exp-title">Test position offset</span>
+          <span class="exp-toggle">Open</span>
+        </div>
+        <div class="exp-body">
+          <div class="control-group" style="margin-bottom: 0;">
+            <div class="control-label">
+              <span>Horizontal offset</span>
+              <span class="control-value" id="val-exp3">0 px</span>
+            </div>
+            <input type="range" id="exp3" min="-150" max="150" value="0">
+          </div>
+          <p class="exp-explainer">The adapting stimulus is shown in its usual central location. After adaptation, the static test pattern is presented at a horizontal offset from that location, ranging from far left (negative) through centred (zero) to far right (positive). Keep your gaze on the central fixation cross throughout both phases.</p>
+        </div>
+      </div>
+
+      <div class="experiment-block" data-exp="4">
+        <div class="exp-header">
+          <span class="exp-num">04</span>
+          <span class="exp-title">Counterphase adapter</span>
+          <span class="exp-toggle">Open</span>
+        </div>
+        <div class="exp-body">
+          <div class="control-group" style="margin-bottom: 0;">
+            <div class="control-label">
+              <span>Counterphase balance</span>
+              <span class="control-value" id="val-exp4">0%</span>
+            </div>
+            <input type="range" id="exp4" min="0" max="100" value="0">
+          </div>
+          <p class="exp-explainer">During adaptation, two ring patterns are superimposed: one contracting and one expanding. The slider sets the balance between them. At 0%, only contracting rings are visible. As the slider increases, an outward-moving pattern is progressively added until at 100% the two are perfectly balanced.</p>
+        </div>
+      </div>
+
+      <div class="experiment-block" data-exp="5">
+        <div class="exp-header">
+          <span class="exp-num">05</span>
+          <span class="exp-title">Noise test lifetime</span>
+          <span class="exp-toggle">Open</span>
+        </div>
+        <div class="exp-body">
+          <div class="control-group" style="margin-bottom: 0;">
+            <div class="control-label">
+              <span>Noise lifetime</span>
+              <span class="control-value" id="val-exp5">static</span>
+            </div>
+            <input type="range" id="exp5" min="0" max="100" value="0">
+          </div>
+          <p class="exp-explainer">The adapter is unchanged. The test stimulus is a random-noise pattern. The slider controls the noise lifetime: at zero, a single noise pattern is generated and shown statically for the whole test phase. As the slider increases, the noise is regenerated at progressively shorter intervals, until at maximum the pattern is regenerated on every frame.</p>
+        </div>
+      </div>
+
+      <div class="controls-footer">
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="reset">Reset all</button>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+</main>
+
+<footer class="site-footer">BIOL2005 Perception · Curtin University</footer>
+
+<script>
+document.querySelectorAll('.nav-links a').forEach(a => {
+  if (a.getAttribute('href') === location.pathname.split('/').pop()) a.classList.add('active');
+});
+
+const canvas = document.getElementById('mae-canvas');
+const ctx = canvas.getContext('2d');
+const W = 700, H = 500;
+const CX = W/2, CY = H/2;
+
+// Adapter: large circle centred in the canvas
+const ADAPTER_RADIUS = 200;
+// Test pattern: same radius (matches adapter spatial extent in canonical case)
+const TEST_RADIUS = 200;
+
+// Fixed pattern properties
+const N_RINGS = 18;             // number of concentric rings in adapter / static test
+const ADAPT_DURATION_S = 20;    // fixed adaptation duration across all experiments
+const TEST_DURATION_S = 15;     // duration of test phase
+
+// ===========================================================================
+// DRAWING PRIMITIVES
+// ===========================================================================
+
+function drawFixationCross() {
+  ctx.strokeStyle = '#8a1c1c';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(CX - 8, CY);
+  ctx.lineTo(CX + 8, CY);
+  ctx.moveTo(CX, CY - 8);
+  ctx.lineTo(CX, CY + 8);
+  ctx.stroke();
+}
+
+function clearStage() {
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+}
+
+// Concentric rings adapter/test. 'phase' is a continuous radial offset in pixels.
+// 'contrast' 0..1 sets the darkness of the dark rings.
+// 'cx/cy' is the centre and 'radius' the outer extent (rings are clipped to a disc).
+function drawRings(cx, cy, radius, phase, contrast) {
+  const ringWidth = radius / N_RINGS;
+  const dark = Math.round(255 * (1 - contrast));
+  const darkStr = `rgb(${dark},${dark},${dark})`;
+  // Clip to circle
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+  ctx.clip();
+  // Draw concentric annuli
+  for (let i = -1; i <= N_RINGS + 1; i++) {
+    const rOuter = i * 2 * ringWidth + phase + ringWidth;
+    const rInner = i * 2 * ringWidth + phase;
+    if (rOuter <= 0) continue;
+    ctx.fillStyle = darkStr;
+    ctx.beginPath();
+    ctx.arc(cx, cy, Math.max(0, rOuter), 0, Math.PI * 2);
+    ctx.arc(cx, cy, Math.max(0, rInner), 0, Math.PI * 2, true);
+    ctx.fill('evenodd');
+  }
+  ctx.restore();
+}
+
+// Dynamic noise field: random binary noise at a coarse pixel scale.
+// Cached as an offscreen canvas so we can keep showing the same noise frame
+// until its lifetime expires.
+let noiseCache = null;            // cached offscreen canvas
+let noiseCacheTime = 0;           // wall-clock time (ms) when this noise was generated
+
+function regenerateNoise(cx, cy, radius) {
+  const size = radius * 2;
+  if (!noiseCache) {
+    noiseCache = document.createElement('canvas');
+    noiseCache.width = size;
+    noiseCache.height = size;
+  } else if (noiseCache.width !== size) {
+    noiseCache.width = size;
+    noiseCache.height = size;
+  }
+  const ncx = noiseCache.getContext('2d');
+  // Clip to circle inside the cache canvas
+  ncx.save();
+  ncx.beginPath();
+  ncx.arc(radius, radius, radius, 0, Math.PI * 2);
+  ncx.clip();
+  const px = 6;
+  for (let y = 0; y < size; y += px) {
+    for (let x = 0; x < size; x += px) {
+      ncx.fillStyle = Math.random() < 0.5 ? '#000' : '#fff';
+      ncx.fillRect(x, y, px, px);
+    }
+  }
+  ncx.restore();
+}
+
+function drawCachedNoise(cx, cy, radius) {
+  // Make sure the cache has the right size; regenerate if absent.
+  if (!noiseCache || noiseCache.width !== radius * 2) {
+    regenerateNoise(cx, cy, radius);
+    noiseCacheTime = performance.now();
+  }
+  ctx.drawImage(noiseCache, cx - radius, cy - radius);
+}
+
+// Map slider 0..100 to a noise lifetime in milliseconds, logarithmic.
+// Slider 0 → 10000 ms (effectively static for a 15s test).
+// Slider 100 → 16 ms (one frame at 60 Hz).
+function noiseLifetimeMs(sliderValue) {
+  if (sliderValue <= 0) return Infinity;
+  const lifeMax = 10000, lifeMin = 16;
+  return lifeMax * Math.pow(lifeMin / lifeMax, sliderValue / 100);
+}
+
+// ===========================================================================
+// ADAPTER & TEST RENDERING (per experiment)
+// ===========================================================================
+
+// Render the ADAPTING stimulus at time t-seconds-into-adaptation.
+// Different experiments may have different adapters (only Exp 4 differs).
+function renderAdapter(tIntoAdapt) {
+  clearStage();
+  // Contracting rings: phase decreases over time
+  const ringWidth = ADAPTER_RADIUS / N_RINGS;
+  const speed = 60;                                    // px/sec radial drift
+  const phaseContract = -((tIntoAdapt * speed) % (2 * ringWidth));
+  const phaseExpand   =  ((tIntoAdapt * speed) % (2 * ringWidth));
+
+  if (activeExp === 4) {
+    // Counterphase: contracting + variable expanding, with balanced contrast.
+    // counterphase = 0  → 100% contracting
+    // counterphase = 100 → 50% contracting + 50% expanding
+    const cp = +document.getElementById('exp4').value / 100;     // 0..1
+    const contractAlpha = 1 - cp / 2;                            // 1 → 0.5
+    const expandAlpha   = cp / 2;                                // 0 → 0.5
+    // Render contracting first
+    ctx.globalAlpha = contractAlpha;
+    drawRings(CX, CY, ADAPTER_RADIUS, phaseContract, 1);
+    // Then expanding, partially transparent so both contribute
+    ctx.globalAlpha = expandAlpha;
+    drawRings(CX, CY, ADAPTER_RADIUS, phaseExpand, 1);
+    ctx.globalAlpha = 1;
+  } else {
+    // Canonical adapter: pure contracting
+    drawRings(CX, CY, ADAPTER_RADIUS, phaseContract, 1);
+  }
+  drawFixationCross();
+}
+
+// Render the TEST stimulus. Different experiments produce different test patterns:
+// - Exp 1, 4: canonical static rings, centred, full contrast
+// - Exp 2: static rings at variable contrast
+// - Exp 3: static rings, offset horizontally
+// - Exp 5: noise field whose lifetime is controlled by the slider
+function renderTest() {
+  clearStage();
+
+  if (activeExp === 5) {
+    // Noise field with lifetime; regenerate if expired.
+    const sliderV = +document.getElementById('exp5').value;
+    const lifetime = noiseLifetimeMs(sliderV);
+    const now = performance.now();
+    if (lifetime === Infinity) {
+      // Static — generate once at the start of the test phase, never regenerate.
+      // (We rely on the test phase to have called regenerateNoise once before this runs.)
+    } else if (now - noiseCacheTime >= lifetime) {
+      regenerateNoise(CX, CY, TEST_RADIUS);
+      noiseCacheTime = now;
+    }
+    drawCachedNoise(CX, CY, TEST_RADIUS);
+    drawFixationCross();
+    return;
+  }
+
+  // All other experiments use ring-based tests.
+  let testContrast = 1.0;
+  let offsetX = 0;
+  if (activeExp === 2) {
+    testContrast = +document.getElementById('exp2').value / 100;
+  } else if (activeExp === 3) {
+    offsetX = +document.getElementById('exp3').value;
+  }
+  drawRings(CX + offsetX, CY, TEST_RADIUS, 0, testContrast);
+  drawFixationCross();
+}
+
+// Render the IDLE-state preview (what's shown when no trial is running).
+// Shows the adapter pattern frozen at t=0 so the student can see what kind of
+// stimulus they're about to adapt to.
+function renderIdlePreview() {
+  clearStage();
+  // For counterphase experiment, show both contracting + expanding at the slider's
+  // current balance to give a preview.
+  const ringWidth = ADAPTER_RADIUS / N_RINGS;
+  if (activeExp === 4) {
+    const cp = +document.getElementById('exp4').value / 100;
+    ctx.globalAlpha = 1 - cp / 2;
+    drawRings(CX, CY, ADAPTER_RADIUS, 0, 1);
+    ctx.globalAlpha = cp / 2;
+    drawRings(CX, CY, ADAPTER_RADIUS, ringWidth/2, 1);   // offset half-cycle so the two are visibly distinct
+    ctx.globalAlpha = 1;
+  } else {
+    drawRings(CX, CY, ADAPTER_RADIUS, 0, 1);
+  }
+  drawFixationCross();
+}
+
+// ===========================================================================
+// TRIAL STATE MACHINE
+// ===========================================================================
+
+let activeExp = 1;
+let phase = 'idle';       // 'idle' | 'adapt' | 'test'
+let phaseStart = 0;
+let phaseEnd = 0;
+let animFrame = null;
+let testTimerHandle = null;
+
+const phaseLabel  = document.getElementById('phase-label');
+const phaseDetail = document.getElementById('phase-detail');
+const timerEl     = document.getElementById('timer');
+
+function setActive(n) {
+  activeExp = n;
+  document.querySelectorAll('.experiment-block').forEach(b => {
+    const exp = +b.getAttribute('data-exp');
+    if (exp === n) {
+      b.classList.add('active');
+      b.querySelector('.exp-toggle').textContent = 'Active';
+    } else {
+      b.classList.remove('active');
+      b.querySelector('.exp-toggle').textContent = 'Open';
+    }
+  });
+  // Switching experiments aborts any in-progress trial and resets to idle preview.
+  stopTrial(true);
+}
+
+function animate(now) {
+  if (phase === 'idle') return;
+  const elapsed = (now - phaseStart) / 1000;
+
+  if (phase === 'adapt') {
+    renderAdapter(elapsed);
+    const remaining = Math.max(0, (phaseEnd - now) / 1000);
+    timerEl.textContent = remaining.toFixed(1) + ' s';
+    if (now >= phaseEnd) {
+      // Transition to test
+      phase = 'test';
+      phaseLabel.textContent = 'TEST';
+      phaseDetail.textContent = 'Keep fixating. Observe the test pattern.';
+      timerEl.textContent = TEST_DURATION_S.toFixed(1) + ' s';
+      // Exp 5 (noise test) always animates — even at "static" lifetime we still need
+      // to generate the initial noise pattern once.
+      if (activeExp === 5) {
+        // Force fresh noise at the start of the test phase
+        regenerateNoise(CX, CY, TEST_RADIUS);
+        noiseCacheTime = now;
+        phaseStart = now;
+        phaseEnd = now + TEST_DURATION_S * 1000;
+        animFrame = requestAnimationFrame(animateTest);
+        return;
+      } else {
+        // Static ring test — single render
+        renderTest();
+        testTimerHandle = setTimeout(() => stopTrial(false), TEST_DURATION_S * 1000);
+        animFrame = null;
+        return;
+      }
+    }
+  }
+  animFrame = requestAnimationFrame(animate);
+}
+
+function animateTest(now) {
+  if (phase !== 'test') return;
+  const remaining = Math.max(0, (phaseEnd - now) / 1000);
+  timerEl.textContent = remaining.toFixed(1) + ' s';
+  renderTest();
+  if (now >= phaseEnd) {
+    stopTrial(false);
+    return;
+  }
+  animFrame = requestAnimationFrame(animateTest);
+}
+
+function startTrial() {
+  cancelAnimationFrame(animFrame);
+  clearTimeout(testTimerHandle);
+  phase = 'adapt';
+  phaseStart = performance.now();
+  phaseEnd = phaseStart + ADAPT_DURATION_S * 1000;
+  phaseLabel.textContent = 'ADAPT';
+  phaseDetail.textContent = 'Fixate the red cross. Do not track the motion.';
+  animFrame = requestAnimationFrame(animate);
+}
+
+function stopTrial(silent) {
+  cancelAnimationFrame(animFrame);
+  clearTimeout(testTimerHandle);
+  animFrame = null;
+  phase = 'idle';
+  phaseLabel.textContent = 'READY';
+  phaseDetail.textContent = silent ? 'Press Start to begin a trial.' : 'Trial complete. Press Start for another.';
+  timerEl.textContent = '';
+  renderIdlePreview();
+}
+
+// ===========================================================================
+// WIRING
+// ===========================================================================
+
+document.querySelectorAll('.experiment-block .exp-header').forEach(h => {
+  h.addEventListener('click', () => {
+    const n = +h.parentElement.getAttribute('data-exp');
+    setActive(n);
+  });
+});
+
+['exp2','exp3','exp4','exp5'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    updateLabels();
+    setActive(+id.replace('exp',''));
+  });
+});
+
+document.getElementById('start-btn').addEventListener('click', startTrial);
+document.getElementById('stop-btn').addEventListener('click', () => stopTrial(true));
+
+document.getElementById('reset').addEventListener('click', () => {
+  document.getElementById('exp2').value = 100;
+  document.getElementById('exp3').value = 0;
+  document.getElementById('exp4').value = 0;
+  document.getElementById('exp5').value = 0;
+  updateLabels();
+  setActive(1);
+});
+
+function updateLabels() {
+  const v2 = +document.getElementById('exp2').value;
+  document.getElementById('val-exp2').textContent = v2 + '%';
+  const v3 = +document.getElementById('exp3').value;
+  const sign3 = v3 > 0 ? '+' : '';
+  document.getElementById('val-exp3').textContent = sign3 + v3 + ' px';
+  const v4 = +document.getElementById('exp4').value;
+  document.getElementById('val-exp4').textContent = v4 + '%';
+  const v5 = +document.getElementById('exp5').value;
+  if (v5 === 0) {
+    document.getElementById('val-exp5').textContent = 'static';
+  } else {
+    const ms = noiseLifetimeMs(v5);
+    document.getElementById('val-exp5').textContent = Math.round(ms) + ' ms';
+  }
+}
+
+updateLabels();
+renderIdlePreview();
+</script>
+
+</body>
+</html>

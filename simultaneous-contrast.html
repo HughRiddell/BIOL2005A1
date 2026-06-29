@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simultaneous Contrast · BIOL2005 Illusions Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,500;1,400&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  #sc-canvas {
+    width: 100%;
+    height: auto;
+    display: block;
+    background: #fff;
+  }
+  .experiment-block {
+    background: #fafaf7;
+    border: 1px solid var(--rule-soft);
+    border-radius: 3px;
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  .experiment-block.active {
+    background: #fff;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent) inset;
+  }
+  .experiment-block .exp-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  .experiment-block .exp-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.06em;
+  }
+  .experiment-block .exp-title {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    flex: 1;
+    margin: 0 10px;
+  }
+  .experiment-block .exp-toggle {
+    font-family: var(--sans);
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .experiment-block.active .exp-toggle { color: var(--accent); }
+  .experiment-block .exp-body { display: none; }
+  .experiment-block.active .exp-body { display: block; }
+  .exp-explainer {
+    font-family: var(--serif);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--rule-soft);
+  }
+  .exp-explainer-only {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-brand"><span>◆</span> BIOL2005 · Illusions Lab</a>
+    <div class="nav-links">
+      <a href="pulfrich.html">Pulfrich Effect</a>
+      <a href="motion-aftereffect.html">Motion Aftereffect</a>
+      <a href="simultaneous-contrast.html">Simultaneous Contrast</a>
+      <a href="illusory-contours.html">Illusory Contours</a>
+    </div>
+  </div>
+</nav>
+
+<main class="page">
+
+  <header class="page-header">
+    <p class="eyebrow">Illusion 03 · Lightness</p>
+    <h1>Simultaneous Contrast</h1>
+    <p class="lede"></p>
+  </header>
+
+  <div class="viewing-note">
+    <strong>How to view</strong>
+    The two grey patches (targets) are the same luminance - that is the same gray colour - but are surrounded by different luminance backgrounds. What do you notice about the percieved luminance of the two targets? 
+  </div>
+
+  <div class="illusion-grid">
+
+    <div>
+      <div class="stage">
+        <canvas id="sc-canvas" width="800" height="500"></canvas>
+      </div>
+    </div>
+
+    <aside class="controls">
+      <p class="controls-title">Manipulations</p>
+
+      <div class="experiment-block active" data-exp="1">
+        <div class="exp-header">
+          <span class="exp-num">01</span>
+          <span class="exp-title">Default illusion</span>
+          <span class="exp-toggle">Active</span>
+        </div>
+        <div class="exp-body">
+          <p class="exp-explainer exp-explainer-only">Shows the canonical simultaneous contrast configuration: two physically identical grey patches placed on opposing dark and light surrounds.</p>
+        </div>
+      </div>
+
+      <div class="experiment-block" data-exp="2">
+        <div class="exp-header">
+          <span class="exp-num">02</span>
+          <span class="exp-title">Surround articulation</span>
+          <span class="exp-toggle">Open</span>
+        </div>
+        <div class="exp-body">
+          <div class="control-group" style="margin-bottom: 0;">
+            <div class="control-label">
+              <span>Articulation</span>
+              <span class="control-value" id="val-exp2">0</span>
+            </div>
+            <input type="range" id="exp2" min="0" max="120" value="0">
+          </div>
+          <p class="exp-explainer">Increasing articulation adds randomly sized and randomly shaded rectangles to the light (right) surround. The base luminance of both surrounds and the grey value of the two central patches remain unchanged.</p>
+        </div>
+      </div>
+
+      <div class="experiment-block" data-exp="3">
+        <div class="exp-header">
+          <span class="exp-num">03</span>
+          <span class="exp-title">Remote region luminance</span>
+          <span class="exp-toggle">Open</span>
+        </div>
+        <div class="exp-body">
+          <div class="control-group" style="margin-bottom: 0;">
+            <div class="control-label">
+              <span>Outer region luminance</span>
+              <span class="control-value" id="val-exp3">50%</span>
+            </div>
+            <input type="range" id="exp3" min="0" max="255" value="128">
+          </div>
+          <p class="exp-explainer">The slider varies the luminance of the outer region around the right-hand patch. The central patch and its immediate surround are held constant; only the more distant background changes. The left-hand configuration is held constant as a reference.</p>
+        </div>
+      </div>
+
+      <div class="experiment-block" data-exp="4">
+        <div class="exp-header">
+          <span class="exp-num">04</span>
+          <span class="exp-title">Ring split</span>
+          <span class="exp-toggle">Open</span>
+        </div>
+        <div class="exp-body">
+          <div class="control-group" style="margin-bottom: 0;">
+            <div class="control-label">
+              <span>Split offset</span>
+              <span class="control-value" id="val-exp4">0%</span>
+            </div>
+            <input type="range" id="exp4" min="0" max="100" value="0">
+          </div>
+          <p class="exp-explainer">The slider pulls the two halves of the ring apart vertically. At zero, the ring is a single unbroken annulus; at maximum, the upper and lower halves have separated and slid across the dark/light boundary in opposite directions.</p>
+        </div>
+      </div>
+
+      <div class="controls-footer">
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="reset">Reset all</button>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+</main>
+
+<footer class="site-footer">BIOL2005 Perception · Curtin University</footer>
+
+<script>
+document.querySelectorAll('.nav-links a').forEach(a => {
+  if (a.getAttribute('href') === location.pathname.split('/').pop()) a.classList.add('active');
+});
+
+const canvas = document.getElementById('sc-canvas');
+const ctx = canvas.getContext('2d');
+const W = 800, H = 500;
+const PATCH_VAL = 128;   // identical grey for all comparison patches across all experiments
+
+function toHex(v) {
+  v = Math.max(0, Math.min(255, Math.round(v)));
+  return '#' + v.toString(16).padStart(2, '0').repeat(3);
+}
+
+// Deterministic seeded PRNG so articulation patterns are stable as the slider moves
+function mulberry32(seed) {
+  return function() {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+// ===========================================================================
+// EXPERIMENT 01: Surround articulation
+// ===========================================================================
+// Two side-by-side panels: left = dark background, right = light background.
+// Identical mid-grey central patches.
+// As articulation increases, additional rectangles of varied size, position, and
+// luminance are added to BOTH surrounds. The central patches remain fully visible
+// (drawn on top). At articulation = 0 the configuration reduces to the classic
+// simultaneous contrast layout.
+function renderExp1(nRects) {
+  // Base surrounds (classic layout at articulation = 0)
+  ctx.fillStyle = toHex(15);
+  ctx.fillRect(0, 0, W/2, H);
+  ctx.fillStyle = toHex(240);
+  ctx.fillRect(W/2, 0, W/2, H);
+
+  // Articulation rectangles: drawn on the RIGHT (white) side only, covering the
+  // entire background. The central patch is drawn LAST (on top), so rectangles
+  // may be placed under the patch without visually obscuring it.
+  // Clip to the right half so rectangles placed near the panel boundary don't
+  // spill onto the left (dark) side.
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(W/2, 0, W/2, H);
+  ctx.clip();
+  const rng = mulberry32(202);
+  for (let i = 0; i < nRects; i++) {
+    // Random size: 25–110 in each dimension
+    const rw = Math.round(25 + rng() * 85);
+    const rh = Math.round(25 + rng() * 85);
+    // Random position. Allow rectangles to extend slightly off the right
+    // panel's edges so the boundaries are densely covered too. Clipping
+    // ensures they never spill onto the left half.
+    const rx = Math.round(W/2 - rw/3 + rng() * (W/2 + rw/3 * 2 - rw));
+    const ry = Math.round(-rh/3 + rng() * (H + rh/3 * 2 - rh));
+    // Random luminance — broadly darker than the near-white background,
+    // skewed toward mid-to-light values with some dark outliers.
+    const u = rng();
+    const lum = Math.round(255 - 25 - Math.pow(u, 1.3) * 220);
+    ctx.fillStyle = toHex(lum);
+    ctx.fillRect(rx, ry, rw, rh);
+  }
+  ctx.restore();
+
+  // Central patches — drawn last, on top of any articulation rectangles.
+  ctx.fillStyle = toHex(PATCH_VAL);
+  ctx.fillRect(W/4 - 60, H/2 - 60, 120, 120);
+  ctx.fillRect(3*W/4 - 60, H/2 - 60, 120, 120);
+}
+
+// ===========================================================================
+// EXPERIMENT 02: Remote region luminance (anchoring vs lateral inhibition)
+// ===========================================================================
+// Two side-by-side panels. Each panel: central patch, an immediate surround of
+// constant luminance, and a REMOTE outer region.
+// Left panel: remote region held at mid-grey (the reference).
+// Right panel: remote region varies with the slider.
+// Patches and immediate surrounds are IDENTICAL in both panels.
+// Lateral inhibition at the patch's receptive-field scale predicts no effect of
+// the remote region. Anchoring theory / Wallach's ratio principle predicts an
+// effect mediated by the highest-luminance anchor in the scene.
+function renderExp2(remoteLum) {
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, W, H);
+  const immediateLum = 50;      // constant
+  const refRemote = 128;        // reference (left panel)
+  const panels = [
+    { cx: W/4,   remote: refRemote },
+    { cx: 3*W/4, remote: +remoteLum }
+  ];
+  for (const p of panels) {
+    // Outer/remote (full panel)
+    ctx.fillStyle = toHex(p.remote);
+    ctx.fillRect(p.cx - W/4, 0, W/2, H);
+    // Immediate surround: inner rectangle (220×220) centred
+    ctx.fillStyle = toHex(immediateLum);
+    ctx.fillRect(p.cx - 110, H/2 - 110, 220, 220);
+    // Central patch: 80×80
+    ctx.fillStyle = toHex(PATCH_VAL);
+    ctx.fillRect(p.cx - 40, H/2 - 40, 80, 80);
+  }
+}
+
+// ===========================================================================
+// EXPERIMENT 03: Koffka ring split (junction/belongingness)
+// ===========================================================================
+// A grey ring spans a half-dark / half-light background.
+// At 0% split, the ring is intact and appears as one uniform shade despite the
+// dark/light context discontinuity behind it.
+// As the slider increases, the ring is broken along the dark/light boundary
+// and its two halves slide apart. With the halves now perceived as separate
+// objects, local simultaneous contrast dominates: the half on the dark side
+// looks lighter, the half on the light side looks darker, even though both
+// are physically identical.
+function renderExp3(splitPct) {
+  ctx.fillStyle = toHex(40);
+  ctx.fillRect(0, 0, W/2, H);
+  ctx.fillStyle = toHex(220);
+  ctx.fillRect(W/2, 0, W/2, H);
+
+  const cx = W/2, cy = H/2;
+  const outerR = 130, innerR = 80;
+  const ringLum = PATCH_VAL;
+  const split = (splitPct / 100) * 50;
+
+  function drawHalfRing(side) {
+    const yOffset = side === 'left' ? -split : split;
+    ctx.fillStyle = toHex(ringLum);
+    ctx.beginPath();
+    if (side === 'left') {
+      ctx.arc(cx, cy + yOffset, outerR, Math.PI/2, 3*Math.PI/2);
+      ctx.arc(cx, cy + yOffset, innerR, 3*Math.PI/2, Math.PI/2, true);
+    } else {
+      ctx.arc(cx, cy + yOffset, outerR, 3*Math.PI/2, Math.PI/2);
+      ctx.arc(cx, cy + yOffset, innerR, Math.PI/2, 3*Math.PI/2, true);
+    }
+    ctx.closePath();
+    ctx.fill();
+  }
+  drawHalfRing('left');
+  drawHalfRing('right');
+}
+
+// ===========================================================================
+// EXPERIMENT MANAGEMENT
+// ===========================================================================
+
+let activeExp = 1;
+
+function setActive(n) {
+  activeExp = n;
+  document.querySelectorAll('.experiment-block').forEach(b => {
+    const exp = +b.getAttribute('data-exp');
+    if (exp === n) {
+      b.classList.add('active');
+      b.querySelector('.exp-toggle').textContent = 'Active';
+    } else {
+      b.classList.remove('active');
+      b.querySelector('.exp-toggle').textContent = 'Open';
+    }
+  });
+  render();
+}
+
+function render() {
+  if (activeExp === 1) {
+    // Default illusion: articulation = 0 (classic configuration).
+    renderExp1(0);
+  } else if (activeExp === 2) {
+    const v = +document.getElementById('exp2').value;
+    renderExp1(v);   // articulation renderer
+    document.getElementById('val-exp2').textContent = v + (v === 1 ? ' rect' : ' rects');
+  } else if (activeExp === 3) {
+    const v = +document.getElementById('exp3').value;
+    renderExp2(v);   // remote-region renderer
+    document.getElementById('val-exp3').textContent = Math.round((v/255)*100) + '%';
+  } else if (activeExp === 4) {
+    const v = +document.getElementById('exp4').value;
+    renderExp3(v);   // ring-split renderer
+    document.getElementById('val-exp4').textContent = v + '%';
+  }
+}
+
+// Wire up experiment headers (click to activate)
+document.querySelectorAll('.experiment-block .exp-header').forEach(h => {
+  h.addEventListener('click', () => {
+    const n = +h.parentElement.getAttribute('data-exp');
+    setActive(n);
+  });
+});
+
+// Wire up sliders (input → activate that experiment + render)
+['exp2','exp3','exp4'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    setActive(+id.replace('exp',''));
+  });
+});
+
+document.getElementById('reset').addEventListener('click', () => {
+  document.getElementById('exp2').value = 0;
+  document.getElementById('exp3').value = 128;
+  document.getElementById('exp4').value = 0;
+  setActive(1);
+});
+
+setActive(1);
+</script>
+
+</body>
+</html>
